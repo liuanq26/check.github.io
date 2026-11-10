@@ -1,0 +1,77 @@
+# ============================================================
+#  MDC noise automatic check configuration
+#  package dir = directory containing noise_check.exe
+#  result defaults to <package-sibling>/noise_result;
+#  override with --result or paths.result
+# ============================================================
+
+paths:
+  result: ""          # empty = <package sibling>/noise_result
+  plot: plot          # checker binary, per-range PDF, graph.root, noiseResults.txt
+  ntuple: ntuple      # optional nt<run>.root
+  hist: hist          # hist<run>.root (required)
+  jobs: ""            # empty = date folders directly under result
+  reports: reports    # merged products and anomaly files
+  state: .state       # state db and logs, relative to package
+
+batch:
+  # The original genJob.sh used: boss.condor -g offlinerun rec<run>.txt
+  # If your wrapper does not accept -g offlinerun, use --group "" on the
+  # command line or set group: "" here.
+  group: offlinerun
+  submit_cmd: boss.condor
+  queue_cmd: "hep_q -u {user}"
+  extra_args: []
+  poll_interval: 60
+  max_wait: 43200
+  submit_timeout: 180
+
+data:
+  raw_dir: /besfs8/offline/data/cal/round20/{date}
+  file_glob: "*GBB*raw"
+  run_regex: '^run_(\d+)_GBB'
+
+db:
+  hosts:
+    - bes3db2.ihep.ac.cn
+    - 202.122.37.73
+    - 202.122.33.101
+    - 202.122.33.102
+  user: guest
+  password: guestpass
+  timeout: 10
+  retries: 2
+
+collect:
+  # MdcNoiseAlg output: hist<run>.root is required for the checker.
+  # nt<run>.root is produced when fillNtuple = true; keep it optional.
+  ntuple: "nt{run}.root"
+  require_ntuple: false
+
+check:
+  source_dir: "."            # plot_pdf.cpp sits at the package root
+  source: plot_pdf.cpp
+  binary_name: plot_pdf      # compiled into result/<paths.plot>/
+  lib_dir: /cvmfs/bes3.ihep.ac.cn/bes3sw/ExternalLib/lcg/LCG_84/tbb/42_20140122/x86_64-centos7-gcc49-opt/lib/
+  compile_flags: "-Wall -g"
+  link_libs: "-lm -ltbb"
+  timeout: 7200
+  results_file: noiseResults.txt
+  profiles:
+    noiseRun:
+      hist_dir: hist                     # relative to result
+      cwd: plot                          # relative to result
+      output: "noise_{runmin}_{runmax}.pdf"
+      results_file: noiseResults.txt
+
+report:
+  cover_mode: auto          # ascii | chinese | auto
+  cover_font: /usr/share/fonts/google-droid-sans-fonts/DroidSansFallbackFull.ttf
+  page_mm: [200, 127]
+  output: "noise_{from}_{to}.pdf"
+
+steps:
+  order: [plan, meta, genjob, submit, wait, collect, check, report]
+
+prompt:
+  last_file: ""             # empty = ~/.noise_check/last.json

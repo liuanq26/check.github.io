@@ -1,0 +1,27 @@
+# ============================================================
+#  noise-check physics parameters
+#
+#  band = mean +/- n * sigma
+#  mean / sigma come from the previous m runs that have this quantity.
+#
+#  keys:  m   lookback window (runs)
+#         n   sigma multiplier
+#         min_runs      fewer samples -> skip the check
+#         min_rel_band  band never narrower than +/- this fraction of mean
+# ============================================================
+
+m            = 200   # lookback window
+n            = 1.0   # sigma multiplier
+min_runs     = 5
+min_rel_band = 0.01
+
+# name        m     n     on/off   label
+occStp        200   1.0   on       step noise occupancy (T&Q match)
+occOut        200   1.0   on       outer noise occupancy (T&Q match)
+occStp_T      200   1.0   on       step noise occupancy (T channel)
+occOut_T      200   1.0   on       outer noise occupancy (T channel)
+nhitStp       200   1.0   off      raw mean nhit (step)
+nhitOut       200   1.0   off      raw mean nhit (outer)
+nhitStp_T     200   1.0   off      raw mean nhit (step T channel)
+nhitOut_T     200   1.0   off      raw mean nhit (outer T channel)
+nevents       200   1.0   off      events used by the noise algorithm

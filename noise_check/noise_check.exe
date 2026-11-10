@@ -1,0 +1,21 @@
+#!/bin/bash
+# ============================================================
+#  MDC noise automatic check -- single entry point
+#
+#    ./noise_check.exe                  interactive panel
+#    ./noise_check.exe 260918 260920    run directly
+#    ./noise_check.exe status
+#    ./noise_check.exe selfcheck
+#
+#  BOSS env exports a python2.7 PYTHONPATH.  Replace it for python3
+#  and give the original value back to child processes through
+#  NOISE_ORIG_PYTHONPATH.
+# ============================================================
+HERE="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+
+export NOISE_ORIG_PYTHONPATH="${PYTHONPATH:-}"
+export PYTHONPATH="$HERE/lib"
+unset PYTHONHOME
+export PYTHONDONTWRITEBYTECODE=1
+
+exec python3 -m noise_check "$@"
