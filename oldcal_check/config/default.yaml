@@ -1,0 +1,72 @@
+# ============================================================
+#  MDC 自动检查配置
+#  软件包目录 = oldcal_check.exe 所在处
+#  result 目录默认在软件包同级，可用 --result 或 paths.result 改
+# ============================================================
+
+paths:
+  result: ""          # 空 = <软件包同级>/result；相对路径按当前工作目录解析
+  plot: plot          # 检查程序和分段 PDF
+  ntuple: ntuple      # xtNtuple<run>.root
+  hist: hist          # hist<run>.root
+  jobs: ""            # 空 = 日期目录直接放在 result 根下
+  reports: reports    # 合并成品、anomaly
+  state: .state       # 状态库和日志，相对软件包目录；写绝对路径可换位置
+
+batch:
+  # boss.condor 是 hepjob 的包装，-g 只接受 physics / ihepai
+  #   group: physics  ->  boss.condor -g physics rec<run>.txt
+  #   group: ""       ->  boss.condor rec<run>.txt
+  group: ""
+  submit_cmd: boss.condor
+  queue_cmd: "hep_q -u {user}"     # 判断作业是否还在跑；留空则只看 bosslog
+  extra_args: []
+  poll_interval: 60
+  max_wait: 43200
+  submit_timeout: 180
+
+data:
+  raw_dir: /besfs8/offline/data/cal/round20/{date}
+  file_glob: "*GBB*raw"
+  run_regex: '^run_(\d+)_GBB'
+
+db:
+  hosts:
+    - bes3db2.ihep.ac.cn
+    - 202.122.37.73
+    - 202.122.33.101
+    - 202.122.33.102
+  user: guest
+  password: guestpass
+  timeout: 10
+  retries: 2
+
+check:
+  source_dir: check          # 相对软件包目录
+  source: check_pdf.cpp
+  binary_name: check_pdf     # 编译产物落在 result/<paths.plot>/
+  lib_dir: /cvmfs/bes3.ihep.ac.cn/bes3sw/ExternalLib/lcg/LCG_84/tbb/42_20140122/x86_64-centos7-gcc49-opt/lib/
+  compile_flags: "-Wall -g"
+  link_libs: "-lRooFitCore -lRooFit -ltbb"
+  profiles:
+    noiseRun:
+      hist_dir: hist         # 相对 result
+      cwd: plot              # 相对 result
+      output: "noise_{runmin}_{runmax}.pdf"
+    # 新增检查在这里加一条即可，例如：
+    # oldCal:
+    #   hist_dir: hist
+    #   cwd: plot/oldCal
+    #   output: "oldcal_{runmin}_{runmax}.pdf"
+
+report:
+  cover_mode: ascii          # ascii | chinese | auto (auto = chinese if reportlab present)
+  cover_font: /usr/share/fonts/google-droid-sans-fonts/DroidSansFallbackFull.ttf
+  page_mm: [200, 127]
+  output: "mdc_{from}_{to}.pdf"    # 落在 result/<paths.reports>/
+
+steps:
+  order: [plan, meta, genjob, submit, wait, collect, check, report]
+
+prompt:
+  last_file: ""              # 空 = ~/.oldcal_check/last.json

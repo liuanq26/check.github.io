@@ -1,0 +1,22 @@
+#!/bin/bash
+# ============================================================
+#  MDC 自动检查 —— 唯一入口
+#
+#    ./oldcal_check.exe                 打开询问面板
+#    ./oldcal_check.exe 260918 260920   直接跑（result 用默认/上次）
+#    ./oldcal_check.exe status
+#    ./oldcal_check.exe selfcheck
+#
+#  BOSS 环境会把 PYTHONPATH 指向 python2.7 的库，直接跑 python3 会报
+#  "_posixsubprocess: dynamic module does not define module export function"。
+#  这里给 python3 换成我们自己的 lib，再把原值通过 MDC_ORIG_PYTHONPATH
+#  还给孩子进程（boss.condor 之类仍然拿到完整 BOSS 环境）。
+# ============================================================
+
+HERE="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+
+export MDC_ORIG_PYTHONPATH="${PYTHONPATH:-}"
+export PYTHONPATH="$HERE/lib"
+unset PYTHONHOME
+
+exec python3 -m oldcal_check "$@"

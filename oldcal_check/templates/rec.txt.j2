@@ -1,0 +1,86 @@
+#include "$RAWDATACNVROOT/share/ReadRawDatajobOptions_dataValid.txt"
+#include "$TRIGMAKERALGROOT/share/jobOptions_TrigMakerAlg.txt"
+//#include "$ROOTIOROOT/share/jobOptions_ReadRec.txt"
+#include "$OFFLINEEVENTLOOPMGRROOT/share/OfflineEventLoopMgr_Option.txt"
+#include "$CALIBSVCROOT/share/job-CalibData.txt"
+#include "$MAGNETICFIELDROOT/share/MagneticField.txt"
+#include "$ESTIMEALGROOT/share/job_EsTimeAlg.txt"
+#include "$MDCCALIBFUNSVCROOT/share/job_MdcCalibFunSvc.txt"
+#include "$CALIBSVCROOT/share/calibConfig_rec_data.txt"
+#include "$DETVERSVCROOT/share/joboptions_DetVerSvc.txt"
+
+#include "$MDCXRECOROOT/share/jobOptions_MdcPatTsfRec_NoRK.txt"
+MdcMakeHits.Switch=1;
+MdcTrkRecon.Switch=1;
+MdcxTrackFinder.Switch=1;
+TrkReco.Switch=1;
+MdcHoughFinder.Switch=1;
+TrkRecoa.Switch=1;
+
+#include "$KALFITALGROOT/share/job_kalfit_numf_data.txt"
+// for calibration , set usage = 1
+KalFitAlg.usage = 1;
+// for calibration , set i_front = -1
+KalFitAlg.i_front = -1;
+//for calibration , set i_back = -1
+KalFitAlg.i_back = -1;
+KalFitAlg.useNCGem=1;
+
+RawDataInputSvc.Config4Revise = "/afs/ihep.ac.cn/users/m/mdccal/besfs10/calib/data2027/runbyrun/oldCal/Config4Revise.json";
+
+CalibMySQLCnvSvc.MdcDataConstBossVer="6.3.3";
+CalibMySQLCnvSvc.EsTimeCalPar=1;
+CalibMySQLCnvSvc.EsTimeBossVer="nightly_build";
+CalibMySQLCnvSvc.Db_Status="test";
+
+ApplicationMgr.TopAlg += {"MdcCalibAlg"};
+ApplicationMgr.DLLs += {"MdcCalibAlg"};
+
+MdcCalibAlg.DistCalib = true;
+
+// Flag for the MdcCalibAlg algorithm
+// 0: initCalib,  1:PreXt,  2:PreT0,  3:XT,  4: GrXt,  5:T0,  6:WirePos,  7: QT
+MdcCalibAlg.MdcCalFlg = 3;
+
+// set Ecm (GeV)
+MdcCalibAlg.Ecm = 4.68;
+
+// Flag for using Kalman filter, 1 for using Kalman filter (default 1), 0 for not
+MdcCalibAlg.MdcKalmanFlg = 1;
+
+// Event type: 0 for Bhabha, 1 for dimu
+KalFitAlg.lead = 0;
+MdcCalibAlg.Event = 0;
+
+// histogram output file for Mdc calibration
+MdcCalibAlg.HistOutput = "@HISTFILE@";
+
+// config file for Mdc Calibraion
+MdcCalibAlg.ConfigFile ="$MDCCALIBALGROOT/share/MdcCalibConfig_bb_noInnDC.txt";
+
+// display event number every N events
+MdcCalibAlg.NumEvtDisplay = 5000;
+
+// Number of events to be processed (default is 10)
+ApplicationMgr.EvtMax = -1;
+
+//--------------------------------------------------------------
+// Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
+MessageSvc.OutputLevel = 5;
+MessageSvc.useColors = true;
+
+RawDataInputSvc.InputFiles={
+@INPUTS@
+};
+
+ApplicationMgr.HistogramPersistency = "ROOT";
+
+NTupleSvc.Output = {
+   "FILE136 DATAFILE='@NTUPLEFILE@' OPT='NEW' TYP='ROOT'"
+};
+
+// ---- 生成信息（oldcal-check 自动写入，勿手改） ----
+// run      = @RUNNO@
+// date     = @DATE@
+// jobdir   = @JOBDIR@
+// generated= @GENERATED@

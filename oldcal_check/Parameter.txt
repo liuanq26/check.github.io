@@ -1,0 +1,34 @@
+# ============================================================
+#  oldcal-check physics parameters
+#
+#  band = mean +/- n * sigma
+#  mean / sigma come from the previous m runs that have this quantity.
+#
+#  keys:  m   lookback window (runs)
+#         n   sigma multiplier
+#         min_runs      fewer samples -> skip the check
+#         min_rel_band  band never narrower than +/- this fraction of mean
+# ============================================================
+
+m            = 200   #步长
+n            = 1.0   #几个σ
+min_runs     = 5
+min_rel_band = 0.01  #检查！！
+
+# name        m     n     on/off   label
+reso          200   1.0   on       resolution (um)
+pcms          200   1.0   on       sigmaP (MeV/c)
+pmean         200   1.0   on       P (GeV/c)
+ppos          200   1.0   off      e+ momentum
+pneg          200   1.0   off      e- momentum
+plab          200   1.0   off      p lab
+rms           200   1.0   off      fit rms
+effRec        200   1.0   on       reconstruction efficiency
+bbeffRec      200   1.0   on       MDC rec efficiency
+effCal        200   1.0   off      calibration efficiency
+effDet1       200   1.0   off      hit efficiency (inner)
+effDet2       200   1.0   on       hit efficiency (step)
+effDet3       200   1.0   on       hit efficiency (outer)
+noiseRatio    200   1.0   off      noise ratio
+z0            200   1.0   on       z0 (mm)
+z0sig         200   1.0   off      sigma z0 (mm)
